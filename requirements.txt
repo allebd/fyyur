@@ -1,0 +1,8 @@
+babel
+python-dateutil==2.6.0
+flask-moment
+flask-wtf
+flask
+flask-sqlalchemy
+flask-migrate
+psycopg2==2.7.7
