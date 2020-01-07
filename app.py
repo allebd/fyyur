@@ -68,7 +68,7 @@ def venues():
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
   search_term = request.form.get('search_term', '')
-  venues = Venue.query. filter(Venue.name.ilike(f'%{search_term}%')).all()
+  venues = Venue.query.filter(Venue.name.ilike(f'%{search_term}%')).all()
 
   response={
     "count": len(venues),
@@ -134,7 +134,7 @@ def create_venue_submission():
 
   venue = {}
   venue['name'] = request.form['name'].strip()
-  venue['city'] = request.form['city'].capitalize().strip()
+  venue['city'] = request.form['city'].title().strip()
   venue['state'] = request.form['state'].strip()
   venue['address'] = request.form['address'].strip()
   venue['phone'] = request.form['phone'].strip()
@@ -147,16 +147,28 @@ def create_venue_submission():
   try:
     city = venue['city']
     location = Location.query.filter_by(city=city).first()
-    
-    if location is None:
-        location = Location(
-            city=venue['city'],
-            state=venue['state']
-          )
-        db.session.add(location)
-        db.session.flush()
 
-    location.add_venue(venue)
+    if location is None:
+      new_location = Location(
+          city=venue['city'],
+          state=venue['state']
+        )
+      db.session.add(new_location)
+      db.session.commit()
+    
+    existing_location = Location.query.filter_by(city=city).first()
+
+    new_venue = Venue(
+      name = venue['name'],
+      address = venue['address'],
+      phone = venue['phone'],
+      genres = venue['genres'],
+      facebook_link = venue['facebook_link'],
+      image_link = venue['image_link'],
+      location_id = existing_location.id
+    )
+    
+    db.session.add(new_venue)
     db.session.commit()
 
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
@@ -181,7 +193,7 @@ def delete_venue(venue_id):
     db.session.rollback()
   finally:
     db.session.close()
-  return redirect(url_for('index'))
+  return redirect(url_for('venues'))
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -289,7 +301,7 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
   artist = {}
   artist['name'] = request.form['name'].strip()
-  artist['city'] = request.form['city'].capitalize().strip()
+  artist['city'] = request.form['city'].title().strip()
   artist['state'] = request.form['state'].strip()
   artist['phone'] = request.form['phone'].strip()
   artist['genres'] = request.form.getlist('genres')
@@ -298,15 +310,15 @@ def edit_artist_submission(artist_id):
 
   error = False
   try:
-    artist_to_update = Artist.query.get(artist_id)
+    edit_artist = Artist.query.get(artist_id)
 
-    artist_to_update.name = artist['name']
-    artist_to_update.city = artist['city']
-    artist_to_update.state = artist['state']
-    artist_to_update.phone = artist['phone']
-    artist_to_update.genres = artist['genres']
-    artist_to_update.facebook_link = artist['facebook_link']
-    artist_to_update.image_link = artist['image_link']
+    edit_artist.name = artist['name']
+    edit_artist.city = artist['city']
+    edit_artist.state = artist['state']
+    edit_artist.phone = artist['phone']
+    edit_artist.genres = artist['genres']
+    edit_artist.facebook_link = artist['facebook_link']
+    edit_artist.image_link = artist['image_link']
 
     db.session.commit()
     flash('Artist ' + artist['name'] + ' was successfully updated!')
@@ -359,7 +371,7 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
   venue = {}
   venue['name'] = request.form['name'].strip()
-  venue['city'] = request.form['city'].capitalize().strip()
+  venue['city'] = request.form['city'].title().strip()
   venue['state'] = request.form['state'].strip()
   venue['address'] = request.form['address'].strip()
   venue['phone'] = request.form['phone'].strip()
@@ -373,15 +385,15 @@ def edit_venue_submission(venue_id):
     city = venue['city']
     location = Location.query.filter_by(city=city).first()
 
-    venue_to_update = Venue.query.get(venue_id)
+    edit_venue = Venue.query.get(venue_id)
 
-    venue_to_update.name = venue['name']
-    venue_to_update.city = location.id
-    venue_to_update.address = venue['address']
-    venue_to_update.phone = venue['phone']
-    venue_to_update.genres = venue['genres']
-    venue_to_update.facebook_link = venue['facebook_link']
-    venue_to_update.image_link = venue['image_link']
+    edit_venue.name = venue['name']
+    edit_venue.city = location.id
+    edit_venue.address = venue['address']
+    edit_venue.phone = venue['phone']
+    edit_venue.genres = venue['genres']
+    edit_venue.facebook_link = venue['facebook_link']
+    edit_venue.image_link = venue['image_link']
 
     db.session.commit()
     flash('Venue ' + venue['name'] + ' was successfully updated!')
@@ -411,7 +423,7 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   artist = {}
   artist['name'] = request.form['name'].strip()
-  artist['city'] = request.form['city'].capitalize().strip()
+  artist['city'] = request.form['city'].title().strip()
   artist['state'] = request.form['state'].strip()
   artist['phone'] = request.form['phone'].strip()
   artist['genres'] = request.form.getlist('genres')
