@@ -90,14 +90,14 @@ def show_venue(venue_id):
         "artist_id": show.artist_id,
         "artist_name": show.Artist.name,
         "artist_image_link": show.Artist.image_link,
-        "start_time": format_datetime(str(show.start_time))
+        "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
       })
     else:
       past_shows.append({
         "artist_id": show.artist_id,
         "artist_name": show.Artist.name,
         "artist_image_link": show.Artist.image_link,
-        "start_time": format_datetime(str(show.start_time))
+        "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
       })
   
   data={
@@ -236,14 +236,14 @@ def show_artist(artist_id):
         "venue_id": show.venue_id,
         "venue_name": show.Venue.name,
         "venue_image_link": show.Venue.image_link,
-        "start_time": format_datetime(str(show.start_time))
+        "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
       })
     else:
       past_shows.append({
         "venue_id": show.venue_id,
         "venue_name": show.Venue.name,
         "venue_image_link": show.Venue.image_link,
-        "start_time": format_datetime(str(show.start_time))
+        "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
       })
   
   data={
@@ -476,7 +476,7 @@ def shows():
       "artist_id": show.artist_id,
       "artist_name": show.Artist.name,
       "artist_image_link": show.Artist.image_link,
-      "start_time": format_datetime(str(show.start_time))
+      "start_time": show.start_time.strftime("%m/%d/%Y, %H:%M")
     })
 
   return render_template('pages/shows.html', shows=data)
